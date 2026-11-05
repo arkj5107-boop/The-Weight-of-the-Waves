@@ -52,8 +52,9 @@
     footer{border-top:1px solid #ffffff20;text-align:center;padding:18px 12px 24px;color:#c3e8f8;font-size:11px;letter-spacing:.08em}
     footer strong{font-family:"Cormorant Garamond",serif;font-size:16px;color:#fff}
     @media(max-width:650px){header{padding-top:23px}.viewer{min-height:unset;padding:8px 0}#book-shell{min-height:54vh}.controls{gap:7px}button{padding:10px 14px}.hint{line-height:1.6}}
+    
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
-  </style>
+      </style>
 </head>
 <body>
   <div id="loader" aria-label="Loading the flipbook">
@@ -80,7 +81,7 @@
     </section>
     <div id="error" class="error">
       <strong>The book could not be loaded.</strong>
-      Check that <code>R. A. MIRANDA_20261105_112837_0000.pdf</code> is included in the repository and that GitHub Pages is enabled.
+      Check that <code>R. A. MIRANDA_20261105_112837_0000.pdf</code> is uploaded in the same folder as <code>index.html</code>.
     </div>
     <nav class="controls" aria-label="Flipbook controls">
       <button id="prev" type="button" disabled>← Previous</button>
@@ -98,7 +99,10 @@
   <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
   <script>
     "use strict";
-    const PDF_FILE = "assets/the-weight-of-the-waves.pdf";
+
+    // The PDF must be uploaded beside index.html in the repository's root folder.
+    const PDF_FILE = "./R.%20A.%20MIRANDA_20261105_112837_0000.pdf";
+
     const loader = document.getElementById("loader");
     const loadingStatus = document.getElementById("loading-status");
     const errorBox = document.getElementById("error");
@@ -161,7 +165,6 @@
           canvas.width = 0;
           canvas.height = 0;
         }
-
         const mobile = window.innerWidth <= 650;
         const pageWidth = mobile ? Math.min(420, Math.max(260, Math.floor(window.innerWidth * .82))) :
           Math.min(520, Math.max(340, Math.floor(window.innerWidth * .36)));
@@ -209,7 +212,9 @@
         console.error(error);
         loadingStatus.style.display = "none";
         errorBox.style.display = "block";
-        errorBox.insertAdjacentHTML("beforeend", `<p>${String(error.message || error).replace(/[<>&"]/g, char => ({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[char]))}</p>`);
+        const detail = document.createElement("p");
+        detail.textContent = error.message || String(error);
+        errorBox.appendChild(detail);
       } finally {
         setTimeout(() => loader.classList.add("hide"), 1200);
       }
@@ -219,3 +224,5 @@
   </script>
 </body>
 </html>
+
+    
