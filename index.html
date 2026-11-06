@@ -1,228 +1,907 @@
- <!DOCTYPE html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#063b78">
-  <meta name="description" content="The Weight of the Waves — an interactive digital flipbook by R. A. Miranda.">
-  <title>The Weight of the Waves | R. A. Miranda</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root{--deep:#031b3d;--navy:#063b78;--blue:#087fc1;--ice:#dff8ff;--white:#f8fdff}
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;font-family:"DM Sans",sans-serif}
-    body{color:var(--white);background:radial-gradient(ellipse at 50% 0%,#126ca8 0%,#073b70 42%,#02152f 100%);overflow-x:hidden}
-    body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;background-image:radial-gradient(#dff8ff .7px,transparent .7px);background-size:8px 8px}
-    #loader{position:fixed;inset:0;z-index:20;display:grid;place-items:center;overflow:hidden;background:linear-gradient(155deg,#c9f4ff 0%,#168cc8 47%,#04295b 100%);transition:opacity .9s ease,visibility .9s ease}
-    #loader.hide{opacity:0;visibility:hidden;pointer-events:none}
-    .loader-copy{position:relative;z-index:3;text-align:center;padding:24px;text-shadow:0 3px 18px #00294d80}
-    .loader-copy .eyebrow{font:600 10px "DM Sans",sans-serif;letter-spacing:.42em;text-transform:uppercase}
-    .loader-copy h1{font:600 clamp(42px,9vw,92px)/.95 "Cormorant Garamond",serif;letter-spacing:.06em;margin:14px 0}
-    .loader-copy p{font-size:11px;letter-spacing:.3em;text-transform:uppercase}
-    .loader-ring{width:38px;height:38px;border:3px solid #ffffff66;border-top-color:#fff;border-radius:50%;margin:22px auto 0;animation:spin .85s linear infinite}
-    .wash{position:absolute;left:-15%;width:130%;height:47%;bottom:-30%;border-radius:48% 52% 0 0;background:linear-gradient(180deg,#effdff 0%,#80dcf8 13%,#1d9ed8 48%,#0873b7 100%);box-shadow:0 -15px 55px #dffaff99;animation:waveWash 2.5s cubic-bezier(.45,0,.25,1) infinite alternate}
-    .wash:before,.wash:after{content:"";position:absolute;left:0;width:100%;height:50px;border-radius:50%;filter:blur(9px)}
-    .wash:before{top:-20px;background:#f4feff}
-    .wash:after{top:8px;background:#b8efff88}
-    @keyframes waveWash{from{transform:translate3d(-2%,22%,0) rotate(-3deg)}to{transform:translate3d(2%,-35%,0) rotate(3deg)}}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    header{position:relative;z-index:1;text-align:center;padding:30px 16px 18px}
-    .eyebrow{font-size:10px;letter-spacing:.38em;text-transform:uppercase;color:#aeeaff;font-weight:700}
-    header h1{font:600 clamp(36px,7vw,64px)/1 "Cormorant Garamond",serif;letter-spacing:.07em;margin:10px 0 5px}
-    header p{margin:0;color:#d7f3ff;font-size:13px}
-    .viewer{width:min(1100px,96vw);margin:0 auto;min-height:62vh;display:flex;align-items:center;justify-content:center;position:relative;padding:10px 0 20px}
-    #book-shell{width:100%;display:flex;justify-content:center;align-items:center;min-height:55vh}
-    #book{margin:auto!important}
-    .page{background:#fffdf7;overflow:hidden;box-shadow:0 5px 24px #00152d55}
-    .page canvas{display:block;width:100%;height:100%;object-fit:contain;background:#fffdf7}
-    .status{position:absolute;z-index:2;text-align:center;color:#e4f8ff;font-size:13px}
-    .status .loader-ring{width:30px;height:30px;margin:0 auto 12px}
-    .error{display:none;max-width:560px;margin:18px auto;padding:18px;border:1px solid #ffffff44;background:#ffffff12;border-radius:12px;text-align:center;line-height:1.6}
-    .error strong{display:block;margin-bottom:6px}
-    .controls{position:relative;z-index:1;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin:6px auto 0;padding:0 12px}
-    button{border:1px solid #b9eaff88;background:#ffffff12;color:#f4fcff;border-radius:30px;padding:11px 18px;font:600 13px "DM Sans",sans-serif;cursor:pointer;transition:.2s}
-    button:hover:not(:disabled){background:#e6f9ff;color:#063b78;transform:translateY(-2px)}
-    button:disabled{opacity:.35;cursor:not-allowed}
-    #counter{min-width:100px;text-align:center;font-size:12px;color:#d6f2ff;font-variant-numeric:tabular-nums}
-    .progress-track{width:min(420px,75vw);height:3px;background:#ffffff30;margin:17px auto 0;overflow:hidden;border-radius:5px}
-    #progress{height:100%;width:0;background:#bcefff;transition:width .25s}
-    .hint{text-align:center;color:#b9e9ff;font-size:11px;padding:0 16px;margin:12px 0 28px}
-    footer{border-top:1px solid #ffffff20;text-align:center;padding:18px 12px 24px;color:#c3e8f8;font-size:11px;letter-spacing:.08em}
-    footer strong{font-family:"Cormorant Garamond",serif;font-size:16px;color:#fff}
-    @media(max-width:650px){header{padding-top:23px}.viewer{min-height:unset;padding:8px 0}#book-shell{min-height:54vh}.controls{gap:7px}button{padding:10px 14px}.hint{line-height:1.6}}
-    
-    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
-      </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#063b78">
+<meta name="description" content="The Weight of the Waves — an interactive digital flipbook by R. A. Miranda.">
+
+<title>The Weight of the Waves | R. A. Miranda</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --deep: #031b3d;
+  --navy: #063b78;
+  --blue: #087fc1;
+  --ice: #dff8ff;
+  --white: #f8fdff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  font-family: "DM Sans", sans-serif;
+}
+
+body {
+  color: var(--white);
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    #126ca8 0%,
+    #073b70 42%,
+    #02152f 100%
+  );
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .13;
+  background-image: radial-gradient(
+    #dff8ff .7px,
+    transparent .7px
+  );
+  background-size: 8px 8px;
+}
+
+/* LOADING SCREEN */
+
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(
+    155deg,
+    #c9f4ff 0%,
+    #168cc8 47%,
+    #04295b 100%
+  );
+  transition: opacity .9s ease, visibility .9s ease;
+}
+
+#loader.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-copy {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  padding: 24px;
+  text-shadow: 0 3px 18px #00294d80;
+}
+
+.loader-copy .eyebrow {
+  font-size: 10px;
+  letter-spacing: .42em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.loader-copy h1 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(42px, 9vw, 92px);
+  line-height: .95;
+  font-weight: 600;
+  letter-spacing: .06em;
+  margin: 14px 0;
+}
+
+.loader-copy p {
+  font-size: 11px;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+}
+
+.loader-copy small {
+  font-size: 10px;
+  letter-spacing: .2em;
+}
+
+.loader-ring {
+  width: 38px;
+  height: 38px;
+  border: 3px solid #ffffff66;
+  border-top-color: #fff;
+  border-radius: 50%;
+  margin: 22px auto;
+  animation: spin .85s linear infinite;
+}
+
+.wash {
+  position: absolute;
+  left: -15%;
+  width: 130%;
+  height: 47%;
+  bottom: -30%;
+  border-radius: 48% 52% 0 0;
+  background: linear-gradient(
+    180deg,
+    #effdff 0%,
+    #80dcf8 13%,
+    #1d9ed8 48%,
+    #0873b7 100%
+  );
+  box-shadow: 0 -15px 55px #dffaff99;
+  animation: waveWash 2.5s cubic-bezier(.45,0,.25,1) infinite alternate;
+}
+
+.wash::before,
+.wash::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  border-radius: 50%;
+  filter: blur(9px);
+}
+
+.wash::before {
+  top: -20px;
+  background: #f4feff;
+}
+
+.wash::after {
+  top: 8px;
+  background: #b8efff88;
+}
+
+@keyframes waveWash {
+  from {
+    transform: translate3d(-2%,22%,0) rotate(-3deg);
+  }
+  to {
+    transform: translate3d(2%,-35%,0) rotate(3deg);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* HEADER */
+
+header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 30px 16px 18px;
+}
+
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: .38em;
+  text-transform: uppercase;
+  color: #aeeaff;
+  font-weight: 700;
+}
+
+header h1 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(36px, 7vw, 64px);
+  line-height: 1;
+  letter-spacing: .07em;
+  font-weight: 600;
+  margin: 10px 0 5px;
+}
+
+header p {
+  margin: 0;
+  color: #d7f3ff;
+  font-size: 13px;
+}
+
+/* FLIPBOOK */
+
+.viewer {
+  width: min(1100px, 96vw);
+  margin: 0 auto;
+  min-height: 62vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 10px 0 20px;
+}
+
+#book-shell {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 55vh;
+}
+
+#book {
+  margin: auto !important;
+}
+
+.page {
+  background: #fffdf7;
+  overflow: hidden;
+  box-shadow: 0 5px 24px #00152d55;
+}
+
+.page img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #fffdf7;
+  user-select: none;
+}
+
+.status {
+  position: absolute;
+  z-index: 2;
+  text-align: center;
+  color: #e4f8ff;
+  font-size: 13px;
+}
+
+.status .loader-ring {
+  width: 30px;
+  height: 30px;
+  margin: 0 auto 12px;
+}
+
+.error {
+  display: none;
+  max-width: 560px;
+  margin: 18px auto;
+  padding: 18px;
+  border: 1px solid #ffffff44;
+  background: #ffffff12;
+  border-radius: 12px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.error strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.error code {
+  overflow-wrap: anywhere;
+}
+
+/* CONTROLS */
+
+.controls {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 6px auto 0;
+  padding: 0 12px;
+}
+
+button {
+  border: 1px solid #b9eaff88;
+  background: #ffffff12;
+  color: #f4fcff;
+  border-radius: 30px;
+  padding: 11px 18px;
+  font: 600 13px "DM Sans", sans-serif;
+  cursor: pointer;
+  transition: .2s;
+}
+
+button:hover:not(:disabled) {
+  background: #e6f9ff;
+  color: #063b78;
+  transform: translateY(-2px);
+}
+
+button:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+#counter {
+  min-width: 100px;
+  text-align: center;
+  font-size: 12px;
+  color: #d6f2ff;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+  width: min(420px, 75vw);
+  height: 3px;
+  background: #ffffff30;
+  margin: 17px auto 0;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+#progress {
+  height: 100%;
+  width: 0;
+  background: #bcefff;
+  transition: width .25s;
+}
+
+.hint {
+  text-align: center;
+  color: #b9e9ff;
+  font-size: 11px;
+  padding: 0 16px;
+  margin: 12px 0 28px;
+}
+
+footer {
+  border-top: 1px solid #ffffff20;
+  text-align: center;
+  padding: 18px 12px 24px;
+  color: #c3e8f8;
+  font-size: 11px;
+  letter-spacing: .08em;
+}
+
+footer strong {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 16px;
+  color: #fff;
+}
+
+/* MOBILE */
+
+@media (max-width: 650px) {
+  header {
+    padding-top: 23px;
+  }
+
+  .viewer {
+    min-height: unset;
+    padding: 8px 0;
+  }
+
+  #book-shell {
+    min-height: 54vh;
+  }
+
+  .controls {
+    gap: 7px;
+  }
+
+  button {
+    padding: 10px 14px;
+  }
+
+  .hint {
+    line-height: 1.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
 </head>
+
 <body>
-  <div id="loader" aria-label="Loading the flipbook">
-    <div class="loader-copy">
-      <div class="eyebrow">An interactive digital story</div>
-      <h1>THE WEIGHT<br>OF THE WAVES</h1>
-      <p>R. A. Miranda</p>
-      <div class="loader-ring"></div>
-      <small>LET THE STORY WASH ASHORE</small>
+
+<!-- BLUE WAVE LOADING SCREEN -->
+
+<div id="loader" aria-label="Loading the flipbook">
+
+  <div class="loader-copy">
+
+    <div class="eyebrow">
+      An interactive digital story
     </div>
-    <div class="wash"></div>
+
+    <h1>
+      THE WEIGHT<br>
+      OF THE WAVES
+    </h1>
+
+    <p>R. A. Miranda</p>
+
+    <div class="loader-ring"></div>
+
+    <small>LET THE STORY WASH ASHORE</small>
+
   </div>
 
-  <header>
-    <div class="eyebrow">A digital storybook</div>
-    <h1>The Weight of the Waves</h1>
-    <p>Written by R. A. Miranda</p>
-  </header>
+  <div class="wash"></div>
 
-  <main>
-    <section class="viewer" aria-label="Interactive flipbook viewer">
-      <div id="loading-status" class="status"><div class="loader-ring"></div>Preparing the pages...</div>
-      <div id="book-shell"><div id="book"></div></div>
-    </section>
-    <div id="error" class="error">
-      <strong>The book could not be loaded.</strong>
-      Check that <code>R. A. MIRANDA_20261106_080359_0000.pdf</code> is uploaded in the same folder as <code>index.html</code>.
+</div>
+
+<!-- WEBSITE HEADER -->
+
+<header>
+
+  <div class="eyebrow">
+    A digital storybook
+  </div>
+
+  <h1>The Weight of the Waves</h1>
+
+  <p>Written by R. A. Miranda</p>
+
+</header>
+
+<main>
+
+  <!-- FLIPBOOK VIEWER -->
+
+  <section class="viewer" aria-label="Interactive flipbook viewer">
+
+    <div id="loading-status" class="status">
+
+      <div class="loader-ring"></div>
+
+      Preparing the pages...
+
     </div>
-    <nav class="controls" aria-label="Flipbook controls">
-      <button id="prev" type="button" disabled>← Previous</button>
-      <span id="counter">Page — / —</span>
-      <button id="next" type="button" disabled>Next →</button>
-      <button id="fullscreen" type="button">⛶ Fullscreen</button>
-    </nav>
-    <div class="progress-track"><div id="progress"></div></div>
-    <p class="hint">Turn pages by dragging a corner, tapping the page, or using the Previous and Next buttons. You can also use ← and → on your keyboard.</p>
-  </main>
 
-  <footer><strong>THE WEIGHT OF THE WAVES</strong> · R. A. MIRANDA</footer>
+    <div id="book-shell">
+      <div id="book"></div>
+    </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
-  <script>
-    "use strict";
+  </section>
 
-    // The PDF must be uploaded beside index.html in the repository's root folder.
-    const PDF_FILE = "./R. A. MIRANDA_20261106_080359_0000.pdf";
+  <!-- ERROR MESSAGE -->
 
-    const loader = document.getElementById("loader");
-    const loadingStatus = document.getElementById("loading-status");
-    const errorBox = document.getElementById("error");
-    const bookEl = document.getElementById("book");
-    const prevBtn = document.getElementById("prev");
-    const nextBtn = document.getElementById("next");
-    const counter = document.getElementById("counter");
-    const progress = document.getElementById("progress");
-    let flipBook = null;
-    let totalPages = 0;
+  <div id="error" class="error">
 
-    if (window.pdfjsLib) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    <strong>The book could not be loaded.</strong>
+
+    <p>
+      Please check that the PDF file is uploaded
+      beside index.html in your GitHub repository.
+    </p>
+
+  </div>
+
+  <!-- NAVIGATION -->
+
+  <nav class="controls" aria-label="Flipbook controls">
+
+    <button id="prev" type="button" disabled>
+      ← Previous
+    </button>
+
+    <span id="counter">
+      Page — / —
+    </span>
+
+    <button id="next" type="button" disabled>
+      Next →
+    </button>
+
+    <button id="fullscreen" type="button">
+      ⛶ Fullscreen
+    </button>
+
+  </nav>
+
+  <div class="progress-track">
+    <div id="progress"></div>
+  </div>
+
+  <p class="hint">
+    Turn pages by dragging a corner, tapping the page,
+    or using the Previous and Next buttons.
+    You can also use ← and → on your keyboard.
+  </p>
+
+</main>
+
+<footer>
+  <strong>THE WEIGHT OF THE WAVES</strong>
+  · R. A. MIRANDA
+</footer>
+
+<!-- LIBRARIES -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
+
+<script>
+"use strict";
+
+/* EXACT PDF FILENAME */
+
+const PDF_FILE =
+  "./R.%20A.%20MIRANDA_20261106_080359_0000.pdf";
+
+/* ELEMENTS */
+
+const loader = document.getElementById("loader");
+
+const loadingStatus =
+  document.getElementById("loading-status");
+
+const errorBox =
+  document.getElementById("error");
+
+const bookEl =
+  document.getElementById("book");
+
+const prevBtn =
+  document.getElementById("prev");
+
+const nextBtn =
+  document.getElementById("next");
+
+const counter =
+  document.getElementById("counter");
+
+const progress =
+  document.getElementById("progress");
+
+let flipBook = null;
+let totalPages = 0;
+
+/* PDF WORKER */
+
+if (window.pdfjsLib) {
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+}
+
+/* UPDATE PAGE CONTROLS */
+
+function updateControls(pageIndex) {
+
+  const current = Math.min(
+    pageIndex + 1,
+    totalPages
+  );
+
+  counter.textContent =
+    `Page ${current} / ${totalPages}`;
+
+  progress.style.width =
+    `${(current / totalPages) * 100}%`;
+
+  prevBtn.disabled =
+    pageIndex <= 0;
+
+  nextBtn.disabled =
+    pageIndex >= totalPages - 1;
+
+}
+
+/* LOAD AND RENDER PDF */
+
+async function renderBook() {
+
+  try {
+
+    /* CHECK LIBRARIES */
+
+    if (
+      !window.pdfjsLib ||
+      !window.St ||
+      !window.St.PageFlip
+    ) {
+
+      throw new Error(
+        "The flipbook libraries could not be loaded. Check your internet connection."
+      );
+
     }
 
-    function updateControls(pageIndex) {
-      const current = Math.min(pageIndex + 1, totalPages);
-      counter.textContent = `Page ${current} / ${totalPages}`;
-      progress.style.width = `${(current / totalPages) * 100}%`;
-      prevBtn.disabled = pageIndex <= 0;
-      nextBtn.disabled = pageIndex >= totalPages - 1;
+    /* LOAD PDF */
+
+    const pdf = await pdfjsLib.getDocument({
+      url: PDF_FILE
+    }).promise;
+
+    totalPages = pdf.numPages;
+
+    const pages = [];
+
+    /* GET PAGE DIMENSIONS */
+
+    const firstPage = await pdf.getPage(1);
+
+    const baseViewport =
+      firstPage.getViewport({ scale: 1 });
+
+    const pageRatio =
+      baseViewport.height / baseViewport.width;
+
+    const targetWidth = Math.min(
+      1500,
+      Math.max(850, window.innerWidth * 1.6)
+    );
+
+    firstPage.cleanup();
+
+    /* RENDER EVERY PDF PAGE */
+
+    for (
+      let number = 1;
+      number <= totalPages;
+      number++
+    ) {
+
+      loadingStatus.innerHTML =
+        `<div class="loader-ring"></div>
+         Preparing page ${number} of ${totalPages}...`;
+
+      const pdfPage =
+        await pdf.getPage(number);
+
+      const originalViewport =
+        pdfPage.getViewport({ scale: 1 });
+
+      const viewport =
+        pdfPage.getViewport({
+          scale: targetWidth / originalViewport.width
+        });
+
+      const canvas =
+        document.createElement("canvas");
+
+      const context =
+        canvas.getContext("2d", {
+          alpha: false
+        });
+
+      canvas.width =
+        Math.floor(viewport.width);
+
+      canvas.height =
+        Math.floor(viewport.height);
+
+      await pdfPage.render({
+        canvasContext: context,
+        viewport: viewport
+      }).promise;
+
+      /* CREATE FLIPBOOK PAGE */
+
+      const page =
+        document.createElement("div");
+
+      page.className = "page";
+
+      const image =
+        document.createElement("img");
+
+      image.alt =
+        `The Weight of the Waves — page ${number}`;
+
+      image.src =
+        canvas.toDataURL("image/jpeg", 0.93);
+
+      image.draggable = false;
+
+      page.appendChild(image);
+
+      pages.push(page);
+
+      pdfPage.cleanup();
+
+      canvas.width = 0;
+      canvas.height = 0;
+
     }
 
-    async function renderBook() {
-      try {
-        if (!window.pdfjsLib || !window.St || !window.St.PageFlip) {
-          throw new Error("The flipbook libraries could not be loaded. Check your internet connection.");
-        }
+    /* RESPONSIVE DIMENSIONS */
 
-        const pdf = await pdfjsLib.getDocument(PDF_FILE).promise;
-        totalPages = pdf.numPages;
-        const pages = [];
-        const firstPage = await pdf.getPage(1);
-        const baseViewport = firstPage.getViewport({scale: 1});
-        const pageRatio = baseViewport.height / baseViewport.width;
-        const targetWidth = Math.min(1500, Math.max(850, window.innerWidth * 1.6));
-        firstPage.cleanup();
+    const mobile =
+      window.innerWidth <= 650;
 
-        for (let number = 1; number <= totalPages; number++) {
-          loadingStatus.innerHTML = `<div class="loader-ring"></div>Preparing page ${number} of ${totalPages}...`;
-          const pdfPage = await pdf.getPage(number);
-          const viewport = pdfPage.getViewport({scale: targetWidth / pdfPage.getViewport({scale:1}).width});
-          const canvas = document.createElement("canvas");
-          const context = canvas.getContext("2d", {alpha:false});
-          canvas.width = Math.floor(viewport.width);
-          canvas.height = Math.floor(viewport.height);
-          await pdfPage.render({canvasContext:context, viewport}).promise;
+    const pageWidth = mobile
+      ? Math.min(
+          420,
+          Math.max(
+            260,
+            Math.floor(window.innerWidth * .82)
+          )
+        )
+      : Math.min(
+          520,
+          Math.max(
+            340,
+            Math.floor(window.innerWidth * .36)
+          )
+        );
 
-          const page = document.createElement("div");
-          page.className = "page";
-          const image = document.createElement("img");
-          image.alt = `The Weight of the Waves — page ${number}`;
-          image.src = canvas.toDataURL("image/jpeg", 0.93);
-          image.draggable = false;
-          image.style.cssText = "display:block;width:100%;height:100%;object-fit:contain;background:#fffdf7";
-          page.appendChild(image);
-          pages.push(page);
-          pdfPage.cleanup();
-          canvas.width = 0;
-          canvas.height = 0;
-        }
-        const mobile = window.innerWidth <= 650;
-        const pageWidth = mobile ? Math.min(420, Math.max(260, Math.floor(window.innerWidth * .82))) :
-          Math.min(520, Math.max(340, Math.floor(window.innerWidth * .36)));
-        const pageHeight = Math.round(pageWidth * pageRatio);
+    const pageHeight =
+      Math.round(pageWidth * pageRatio);
 
-        flipBook = new St.PageFlip(bookEl, {
-          width: pageWidth,
-          height: pageHeight,
-          size: "stretch",
-          minWidth: 250,
-          maxWidth: 650,
-          minHeight: 350,
-          maxHeight: 920,
-          showCover: true,
-          usePortrait: mobile,
-          flippingTime: 850,
-          drawShadow: true,
-          maxShadowOpacity: .38,
-          mobileScrollSupport: false,
-          swipeDistance: 25,
-          clickEventForward: true,
-          autoSize: true,
-          startPage: 0
-        });
+    /* INITIALIZE FLIPBOOK */
 
-        flipBook.loadFromHTML(pages);
-        flipBook.on("flip", event => updateControls(event.data));
-        updateControls(0);
-        loadingStatus.style.display = "none";
-        prevBtn.addEventListener("click", () => flipBook && flipBook.flipPrev());
-        nextBtn.addEventListener("click", () => flipBook && flipBook.flipNext());
-        document.getElementById("fullscreen").addEventListener("click", async () => {
-          const target = document.querySelector(".viewer");
-          try {
-            if (!document.fullscreenElement) await target.requestFullscreen();
-            else await document.exitFullscreen();
-          } catch (error) { console.warn("Fullscreen is unavailable:", error); }
-        });
-        document.addEventListener("keydown", event => {
-          if (!flipBook) return;
-          if (event.key === "ArrowRight") flipBook.flipNext();
-          if (event.key === "ArrowLeft") flipBook.flipPrev();
-        });
-      } catch (error) {
-        console.error(error);
-        loadingStatus.style.display = "none";
-        errorBox.style.display = "block";
-        const detail = document.createElement("p");
-        detail.textContent = error.message || String(error);
-        errorBox.appendChild(detail);
-      } finally {
-        setTimeout(() => loader.classList.add("hide"), 1200);
+    flipBook = new St.PageFlip(bookEl, {
+
+      width: pageWidth,
+
+      height: pageHeight,
+
+      size: "stretch",
+
+      minWidth: 250,
+
+      maxWidth: 650,
+
+      minHeight: 350,
+
+      maxHeight: 920,
+
+      showCover: true,
+
+      usePortrait: mobile,
+
+      flippingTime: 850,
+
+      drawShadow: true,
+
+      maxShadowOpacity: .38,
+
+      mobileScrollSupport: false,
+
+      swipeDistance: 25,
+
+      clickEventForward: true,
+
+      autoSize: true,
+
+      startPage: 0
+
+    });
+
+    /* LOAD PAGES */
+
+    flipBook.loadFromHTML(pages);
+
+    /* PAGE CHANGE EVENT */
+
+    flipBook.on("flip", function(event) {
+
+      updateControls(event.data);
+
+    });
+
+    updateControls(0);
+
+    loadingStatus.style.display = "none";
+
+    /* PREVIOUS BUTTON */
+
+    prevBtn.addEventListener("click", function() {
+
+      if (flipBook) {
+        flipBook.flipPrev();
       }
-    }
 
-    window.addEventListener("load", renderBook);
-  </script>
+    });
+
+    /* NEXT BUTTON */
+
+    nextBtn.addEventListener("click", function() {
+
+      if (flipBook) {
+        flipBook.flipNext();
+      }
+
+    });
+
+    /* FULLSCREEN */
+
+    document
+      .getElementById("fullscreen")
+      .addEventListener("click", async function() {
+
+        const target =
+          document.querySelector(".viewer");
+
+        try {
+
+          if (!document.fullscreenElement) {
+
+            await target.requestFullscreen();
+
+          } else {
+
+            await document.exitFullscreen();
+
+          }
+
+        } catch (error) {
+
+          console.warn(
+            "Fullscreen is unavailable:",
+            error
+          );
+
+        }
+
+      });
+
+    /* KEYBOARD NAVIGATION */
+
+    document.addEventListener("keydown", function(event) {
+
+      if (!flipBook) return;
+
+      if (event.key === "ArrowRight") {
+
+        flipBook.flipNext();
+
+      }
+
+      if (event.key === "ArrowLeft") {
+
+        flipBook.flipPrev();
+
+      }
+
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    loadingStatus.style.display = "none";
+
+    errorBox.style.display = "block";
+
+    const detail =
+      document.createElement("p");
+
+    detail.textContent =
+      error.message || String(error);
+
+    errorBox.appendChild(detail);
+
+  } finally {
+
+    setTimeout(function() {
+
+      loader.classList.add("hide");
+
+    }, 1200);
+
+  }
+
+}
+
+/* START WEBSITE */
+
+window.addEventListener("load", renderBook);
+
+</script>
+
 </body>
 </html>
-
-    
